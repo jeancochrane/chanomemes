@@ -5,13 +5,12 @@ import requests
 
 import secrets
 
-
 def get_photo():
     """
     Returns the URL of a random CC-licensed image of Chance.
     """
     endpoint = "https://api.flickr.com/services/rest/"
-    api_key = secrets.api_key
+    api_key = secrets.flickr_api_key
     method = "flickr.photos.search"
     format = "json"
     license = "1,2,4,5,7"  # All CC

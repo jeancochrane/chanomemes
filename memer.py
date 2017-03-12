@@ -3,10 +3,11 @@ from io import BytesIO
 import requests
 from PIL import Image, ImageFont, ImageDraw
 
-from .flickr import get_photo
+
+FONT = 'fonts/impact.ttf'
 
 
-def open_image(url):
+def image(url):
     """
     Opens an image from the given URL for processing.
     """
@@ -15,7 +16,7 @@ def open_image(url):
     return img
 
 
-def add_text(img, text, font):
+def meme(img, text, font=FONT):
     """
     Superimposes text over a given image.
 
@@ -26,9 +27,9 @@ def add_text(img, text, font):
     """
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype(font, 16)
-    draw.text((0, 0), "Sample Text", (255, 255, 255), font=font)
-    img.show()
+    draw.text((0, 0), text, (255, 255, 255), font=font)
+    return img
 
 
-img = open_image(get_photo())
-add_text(img, 'Testing!', 'impact.ttf')
+img = image(get_photo())
+meme(img, 'Testing!', 'impact.ttf')
