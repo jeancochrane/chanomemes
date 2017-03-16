@@ -32,7 +32,6 @@ def main():
                 main()
                 break
             elif tweet is Hangup:
-                main()
                 break
             elif tweet.get("text") and tweet["id_str"] not in processed_ids:
                 processed_ids.append(tweet["id_str"])
