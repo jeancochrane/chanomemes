@@ -90,9 +90,13 @@ def meme(img, text, font=FONT):
 
     # Make the drawing
     position = [5, 0]
-    for line in split_text:
-        draw.text(position, '\n'.join(line), (255, 255, 255),
+    if len(split_text) == 1:
+        draw.text(position, '\n'.join(split_text), (255, 255, 255),
                             font=font)
-        position[1] += draw.textsize('\n'.join(line), font=font)[1] + 16
+    else:
+        for line in split_text:
+            draw.text(position, '\n'.join(line), (255, 255, 255),
+                                font=font)
+            position[1] += draw.textsize('\n'.join(line), font=font)[1] + 16
 
     return img
