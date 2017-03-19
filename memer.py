@@ -61,12 +61,9 @@ def meme(img, text):
     for line in lines:
         line_copy = line
         if draw.textsize(line, font=font)[0] > img_width:
-            print('Line too long!')
             too_long = True
             line_copy = line
             while too_long:
-                print('Img width %s, line length %s'
-                      % (img_width, draw.textsize(line_copy, font=font)[0]))
                 line_copy = line_copy[0:len(line_copy)-1]
                 if draw.textsize(line_copy, font=font)[0] <= img_width:
                     # Find the closest preceding space
@@ -79,7 +76,6 @@ def meme(img, text):
         cleaned_lines.append(line_copy)
 
     # Figure out how many lines there are
-    print('cleaned_lines: ', cleaned_lines)
     if len(cleaned_lines) > 1:
         if len(cleaned_lines) % 2 == 0:
             halfway_pt = (len(cleaned_lines)//2)
@@ -89,8 +85,6 @@ def meme(img, text):
             split_text = [cleaned_lines[0:halfway_pt], cleaned_lines[halfway_pt:]]
     else:
         split_text = cleaned_lines.copy()
-
-    print('split_text: ', split_text)
 
     # Draw the text on the canvas
     position = [5, 0]
