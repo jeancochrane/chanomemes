@@ -4,6 +4,7 @@ import time
 import socket
 from ssl import SSLError
 from http.client import BadStatusLine
+from os import listdir
 
 from twitter import Twitter, TwitterStream, TwitterHTTPError, OAuth
 from wordfilter import Wordfilter
@@ -17,6 +18,8 @@ AUTH = OAuth(
     secrets.token_secret,
     secrets.consumer_key,
     secrets.consumer_secret)
+
+FONTS = [("fonts/" + font) for font in listdir('fonts')]
 
 
 def main():

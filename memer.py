@@ -1,12 +1,10 @@
 from io import BytesIO
 from math import ceil
 import random
+from os import listdir
 
 import requests
 from PIL import Image, ImageFont, ImageDraw
-
-
-FONT = 'fonts/impact.ttf'
 
 
 def image(url):
@@ -18,21 +16,25 @@ def image(url):
     return img
 
 
-def meme(img, text, font=FONT):
+def meme(img, text):
     """
     Superimposes text over a given image.
 
     Params –
         img: a PIL Image (obj)
         text: text to superimpose (str)
-        font: filepath to the font to use (str)
     """
+    # Choose a random font from the fonts/ directory
+    possible_fonts = [("fonts/" + font) for font in listdir('fonts')]
+    font_choice = random.sample(possible_fonts, 1)[0]
+    font = ImageFont.truetype(font_choice, 36)
+
+    # Get some useful info about the image and instantiate the canvas
     img_width, img_height = img.size
     text_img = Image.new('RGBA', img.size, (255, 255, 255, 0))
     draw = ImageDraw.Draw(text_img)
-    font = ImageFont.truetype(font, 36)
 
-    # Handle line breaks in text
+    # Clean up line breaks in text
     lines = []
     if '/' in text:
         for line in text.split('/'):
@@ -90,7 +92,7 @@ def meme(img, text, font=FONT):
 
     print('split_text: ', split_text)
 
-    # Make the drawing
+    # Draw the text on the canvas
     position = [5, 0]
     rotation_degree = random.uniform(-45, 45)
     if len(split_text) == 1:
@@ -107,7 +109,12 @@ def meme(img, text, font=FONT):
             draw.text((position[0]-2, position[1]-2), '\n'.join(line),
                       (255, 255, 255), font=font)
             position[1] += draw.textsize('\n'.join(line), font=font)[1] + 16
-    rotated_text = text_img.rotate(rotation_degree, expand=1)
+
+    # Rotate the text canvas for DRAMATIC EFFECT, resize + paste
+    rotated_text = text_img.rotate(
+        rotation_degree,
+        expand=1,
+        resample=Image.BICUBIC)
     img.resize(rotated_text.size)
     img.paste(rotated_text, (0, 0), mask=rotated_text)
     return img
