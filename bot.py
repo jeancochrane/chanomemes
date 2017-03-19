@@ -1,9 +1,16 @@
-from twitter import Twitter, OAuth
-from twitter import TwitterStream, Timeout, HeartbeatTimeout, Hangup
+from __future__ import print_function
+import sys
+import time
+import socket
+from ssl import SSLError
+from http.client import BadStatusLine
+
+from twitter import Twitter, TwitterStream, TwitterHTTPError, OAuth
 from wordfilter import Wordfilter
 
 import secrets
-from . import flickr, memer
+import flickr
+import memer
 
 AUTH = OAuth(
     secrets.token,
@@ -23,23 +30,29 @@ def main():
         retry=5)
 
     # Continuously iterate over the stream generator and make replies
-    for tweet in bot_stream.user():
-        if tweet is not None:
-            if tweet is Timeout:
-                main()
-                break
-            elif tweet is HeartbeatTimeout:
-                main()
-                break
-            elif tweet is Hangup:
-                break
-            elif tweet.get("text") and tweet["id_str"] not in processed_ids:
-                processed_ids.append(tweet["id_str"])
-                url = flickr.get_photo()
-                orig_img = memer.image(url)
-                text = get_text(tweet["text"])
-                img = memer.meme(orig_img, text)
-                reply(tweet, img)
+    # (This runs an infinite loop – make sure to manage this code with
+    # a process control system)
+    while True:
+        try:
+            for tweet in bot_stream.user():
+                if not tweet or tweet.get("timeout") or tweet["id_str"] in processed_ids:
+                    continue
+                if tweet.get("disconnect") or tweet.get("hangup"):
+                    print("[WARN] Stream connection lost: %s" % str(tweet), file=sys.stderr)
+                    break
+                if tweet.get("text"):
+                    processed_ids.append(tweet["id_str"])
+                    url = flickr.get_photo()
+                    orig_img = memer.image(url)
+                    text = get_text(tweet["text"])
+                    img = memer.meme(orig_img, text)
+                    reply(tweet, img)
+                else:
+                    print("[INFO] Received special message: %s" % str(tweet), file=sys.stderr)
+        except(TwitterHTTPError, BadStatusLine, SSLError, socket.error) as e:
+            print("[WARN] Stream connection lost - reconnecting... (%s, %s)"
+                  % (type(e), e), file=sys.stderr)
+            time.sleep(2)
 
 
 def get_text(text):
@@ -53,7 +66,7 @@ def get_text(text):
                    "and I\'d be happy to make you a meme!")
         return(text.split(quotes)[1])
     else:
-        return("Sorry Friend!\nWe don't support abusive language.")
+        return("Sorry Friend!\nWe don't support that kind of language.")
 
 
 def reply(tweet, img):

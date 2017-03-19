@@ -14,7 +14,7 @@ def image(url):
     Opens an image from the given URL for processing.
     """
     r = requests.get(url)
-    img = Image.open(BytesIO(r.content))
+    img = Image.open(BytesIO(r.content)).convert('RGBA')
     return img
 
 
@@ -28,10 +28,9 @@ def meme(img, text, font=FONT):
         font: filepath to the font to use (str)
     """
     img_width, img_height = img.size
-    text_img = Image.new(img.mode, img.size)
+    text_img = Image.new('RGBA', img.size, (255, 255, 255, 0))
     draw = ImageDraw.Draw(text_img)
     font = ImageFont.truetype(font, 36)
-    
 
     # Handle line breaks in text
     lines = []
@@ -93,16 +92,22 @@ def meme(img, text, font=FONT):
 
     # Make the drawing
     position = [5, 0]
-    rotation_degree = random.uniform(0, 45)
+    rotation_degree = random.uniform(-45, 45)
     if len(split_text) == 1:
-        draw.text(position, '\n'.join(split_text), (255, 255, 255),
+        # Start with black text
+        draw.text(position, '\n'.join(split_text), (0, 0, 0),
                             font=font)
+        # Shift position over a lil and add white on top
+        draw.text((position[0]-2, position[1]-2), '\n'.join(split_text),
+                  (255, 255, 255), font=font)
     else:
         for line in split_text:
-            draw.text(position, '\n'.join(line), (255, 255, 255),
+            draw.text(position, '\n'.join(line), (0, 0, 0),
                                 font=font)
+            draw.text((position[0]-2, position[1]-2), '\n'.join(line),
+                      (255, 255, 255), font=font)
             position[1] += draw.textsize('\n'.join(line), font=font)[1] + 16
     rotated_text = text_img.rotate(rotation_degree, expand=1)
     img.resize(rotated_text.size)
-    img.paste(rotated_text)
+    img.paste(rotated_text, (0, 0), mask=rotated_text)
     return img
