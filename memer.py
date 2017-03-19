@@ -34,41 +34,65 @@ def meme(img, text, font=FONT):
     lines = []
     if '/' in text:
         for line in text.split('/'):
-            lines.append(line)
+            # Split on the slash, getting rid of spaces
+            stripped_line = line
+            if line[0] == ' ':
+                stripped_line = stripped_line[1:]
+            if line[-1] == ' ':
+                stripped_line = stripped_line[0:-1]
+            lines.append(stripped_line)
     elif '\n' in text:
         for line in text.split('\n'):
-            lines.append(line)
+            stripped_line = line
+            if line[0] == ' ':
+                stripped_line = stripped_line[1:]
+            if line[-1] == ' ':
+                stripped_line = stripped_line[0:-1]
+            lines.append(stripped_line)
     else:
         lines.append(text)
 
     # Create linebreaks when text is too long for the image
-    cleaned_lines = lines
+    cleaned_lines = []
     for line in lines:
-        if draw.textsize(line) > img_width:
+        line_copy = line
+        if draw.textsize(line, font=font)[0] > img_width:
+            print('Line too long!')
             too_long = True
             line_copy = line
             while too_long:
+                print('Img width %s, line length %s'
+                      % (img_width, draw.textsize(line_copy, font=font)[0]))
                 line_copy = line_copy[0:len(line_copy)-1]
-                if draw.textsize(line_copy) <= img_width:
-                    stopping_point = len(line_copy)
-                    too_long = False
-            frag1 = line[0:stopping_point]
+                if draw.textsize(line_copy, font=font)[0] <= img_width:
+                    # Find the closest preceding space
+                    if (line_copy[-1] == ' ') or (' ' not in line_copy):
+                        stopping_point = len(line_copy)
+                        too_long = False
+            frag1 = line[0:stopping_point-1]
             frag2 = line[stopping_point:]
-            line = frag1 + '\n' + frag2
-        cleaned_lines.append(line)
+            line_copy = frag1 + '\n' + frag2
+        cleaned_lines.append(line_copy)
 
     # Figure out how many lines there are
-    if len(lines) % 2 == 0:
-        halfway_pt = (len(lines)/2) - 1
-        split_text = [lines[0:halfway_pt], lines[halfway_pt:]]
+    print('cleaned_lines: ', cleaned_lines)
+    if len(cleaned_lines) > 1:
+        if len(cleaned_lines) % 2 == 0:
+            halfway_pt = (len(cleaned_lines)//2)
+            split_text = [cleaned_lines[0:halfway_pt], cleaned_lines[halfway_pt:]]
+        else:
+            halfway_pt = ceil(len(cleaned_lines)/2)
+            split_text = [cleaned_lines[0:halfway_pt], cleaned_lines[halfway_pt:]]
     else:
-        halfway_pt = ceil(len(lines)/2)
-        split_text = [lines[0:halfway_pt], lines[halfway_pt:]]
+        split_text = cleaned_lines.copy()
+
+    print('split_text: ', split_text)
 
     # Make the drawing
-    draw.multiline_text((0, 0), split_text[0], (255, 255, 255),
-                        font=font,
-                        align='center')
+    position = [5, 0]
+    for line in split_text:
+        draw.text(position, '\n'.join(line), (255, 255, 255),
+                            font=font)
+        position[1] += draw.textsize('\n'.join(line), font=font)[1] + 16
 
-    # TODO: Draw the second half on the bottom of the image
     return img
