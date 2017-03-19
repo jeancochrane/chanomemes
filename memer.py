@@ -1,5 +1,6 @@
 from io import BytesIO
 from math import ceil
+import random
 
 import requests
 from PIL import Image, ImageFont, ImageDraw
@@ -26,9 +27,11 @@ def meme(img, text, font=FONT):
         text: text to superimpose (str)
         font: filepath to the font to use (str)
     """
-    draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype(font, 36)
     img_width, img_height = img.size
+    text_img = Image.new(img.mode, img.size)
+    draw = ImageDraw.Draw(text_img)
+    font = ImageFont.truetype(font, 36)
+    
 
     # Handle line breaks in text
     lines = []
@@ -90,6 +93,7 @@ def meme(img, text, font=FONT):
 
     # Make the drawing
     position = [5, 0]
+    rotation_degree = random.uniform(0, 45)
     if len(split_text) == 1:
         draw.text(position, '\n'.join(split_text), (255, 255, 255),
                             font=font)
@@ -98,5 +102,7 @@ def meme(img, text, font=FONT):
             draw.text(position, '\n'.join(line), (255, 255, 255),
                                 font=font)
             position[1] += draw.textsize('\n'.join(line), font=font)[1] + 16
-
+    rotated_text = text_img.rotate(rotation_degree, expand=1)
+    img.resize(rotated_text.size)
+    img.paste(rotated_text)
     return img
