@@ -1,8 +1,8 @@
 from twitter import Twitter, OAuth
 from twitter import TwitterStream, Timeout, HeartbeatTimeout, Hangup
+from wordfilter import Wordfilter
 
 import secrets
-
 from . import flickr, memer
 
 AUTH = OAuth(
@@ -37,9 +37,23 @@ def main():
                 processed_ids.append(tweet["id_str"])
                 url = flickr.get_photo()
                 orig_img = memer.image(url)
-                text = tweet["text"]
+                text = get_text(tweet["text"])
                 img = memer.meme(orig_img, text)
                 reply(tweet, img)
+
+
+def get_text(text):
+    filt = Wordfilter()
+    filt.removeWord('bitch')
+    if not filt.blacklisted(text):
+        if '\"' in text:
+            quotes = '\"'
+        else:
+            return("Hey Bud!\nPut your text in \"quotes\"" +
+                   "and I\'d be happy to make you a meme!")
+        return(text.split(quotes)[1])
+    else:
+        return("Sorry Friend!\nWe don't support abusive language.")
 
 
 def reply(tweet, img):
