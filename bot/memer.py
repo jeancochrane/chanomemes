@@ -25,7 +25,7 @@ def meme(img, text):
         text: text to superimpose (str)
     """
     # Choose a random font from the fonts/ directory
-    possible_fonts = [("fonts/" + font) for font in listdir('fonts')]
+    possible_fonts = [("../fonts/" + font) for font in listdir('../fonts')]
     font_choice = random.sample(possible_fonts, 1)[0]
     font = ImageFont.truetype(font_choice, 36)
 
@@ -88,7 +88,7 @@ def meme(img, text):
 
     # Draw the text on the canvas
     position = [5, 0]
-    rotation_degree = random.uniform(-45, 45)
+    rotation_degree = random.uniform(-30, 30)
     if len(split_text) == 1:
         # Start with black text
         draw.text(position, '\n'.join(split_text), (0, 0, 0),
