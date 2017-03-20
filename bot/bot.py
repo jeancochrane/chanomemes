@@ -60,7 +60,6 @@ def main():
 
 def get_text(text):
     filt = Wordfilter()
-    filt.removeWord('bitch')
     if not filt.blacklisted(text):
         if '\"' in text:
             quotes = '\"'
