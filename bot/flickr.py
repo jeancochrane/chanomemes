@@ -1,5 +1,7 @@
+from __future__ import print_function
 import random
 import json
+import sys
 
 import requests
 
@@ -50,12 +52,12 @@ def get_photo():
 
             return photo_url
         except ValueError:
-            print('Catching ValueError')
-            print('Request URL: ', r.url)
-            print('Encoding: ', r.encoding)
-            print('Content type: ', r.headers['content-type'])
+            print('Catching ValueError...', file=sys.stderr)
+            print('Request URL: ', r.url, file=sys.stderr)
+            print('Encoding: ', r.encoding, file=sys.stderr)
+            print('Content type: ', r.headers['content-type'], file=sys.stderr)
             with open('bad_output.txt', 'w') as out:
                 json.dump(r.text, out)
     else:
-        print('Bad status code: ', r.status_code)
-        print('Request URL: ', r.url)
+        print('Bad status code: ', r.status_code, file=sys.stderr)
+        print('Request URL: ', r.url, file=sys.stderr)
