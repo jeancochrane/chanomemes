@@ -1,0 +1,32 @@
+language: bash
+
+addons:
+  ssh_known_hosts: chano4mayor.com
+
+install: true
+
+before_script:
+- echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+
+script:
+- ssh-keyscan -t $TRAVIS_SSH_KEY_TYPES -H \$HOST 2>&1 | tee -a $HOME/.ssh/known_hosts
+- openssl aes-256-cbc -K $encrypted_52bed448cea9_key -iv $encrypted_52bed448cea9_iv -in git_user.enc -out /tmp/git_user -d
+
+before_deploy: |
+  eval "$(ssh-agent -s)";
+  chmod 600 /tmp/git_user;
+  ssh-add /tmp/git_user;
+  git checkout -b master;
+  git remote add production git@$HOST:$PROJ_PATH;
+
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: git push production master --quiet
+  on:
+    all_branches: true
+    tags: true
+env:
+  global:
+  - secure: kySLCq1WsEdoAW1UEBIYb1T83VEoKbnAI6lVLQYNhKpAELxGM6TOz3Yw/e3oDdAUULRmL18L325favAXuUHdQefu2vTg+NJ7meFmOOHe7MJ9xu++1XvrGpBsBfv2gshhJYwjSm7EFECvLIyeZ+tUaPqIpPHkE65r9RJ4xutEzHHMkgk8fRFamxlOWISKMrN8M2rlAFAqUbFDS2K1YoCwlH0KoAAzA5HPNXzD+2cER/llGC9PD98jG8/VshqVRCEuVMJu3MAxjZmC/AkV3BxNIoznqb/SrqPesbAyzhR0G42AKvxMCuh3N7UU1M6QA9T1qb+lI617lXJHSfJR6Cx3aZOrCZLSWSSQsUZQvF8F9IiljsqugRYS6dehTlde+214mE6o5V9Wdrm260yyp8LuLfja7pcZyZ3k3CI0UoR0MRuclbrZY44nDVWd4oh1hdWJNpbooY3EJk5m6scnqBfye7wEZbljoFFk+S1/uYv4K73N0lCykrzrJGwUaI1OjVfI9QvBYRKHiN1dOZl/kLNnz7/jydCBfAcuB823ITduZV2hEoSBUK/r/SDfB/UTNT0zODfG+JcUGIeRU3U/0q0VAvc8HQFjBDpZjORazdPLG034BW75ObP7bhiIt2kjC0Q3VX56rLFDBDuipSl+bE1TvrBfD0k9MYZxFzaxzTOJXDU=
+  - secure: LHmsWwfMmPSjCmfocV1xSaF2MdSgU64k73BCFlDsuYID3erZNdzNiCpYOaQK8rd1mYTqySnXHs6OYlWdwa3SFv+N/YDo8vfrYaC6HGuBQnhbAJ5dTdwSpQ+dwl686OjuqTNQ1HiEa6gApul5u/HMbTjFhqcfBQayGtnbOuCkyZbK6qcfqdm81LJqS4g/f0Jx0GfEufb8F8ds+/Oh+J1tZ4eb+apAFpMKdiFXafRsUfhykW4uqJwitWl+6H1vBr43cC+wFGRFofVpxoUeKM1U3wxiKq6D5LU8U7nQiZVq0X8tcsIjMgOPAkhq1TwH+L3cc5aeDq0jRZXSgxXxzIs4u87shYP/ilfGgL+iXrCtzdal/03vAerotsj3uVnUCKjC8q1yimGdqPBewTWMeepyM+D6cvzm89WbFqlQTGfm5yBd+3NVRbDArjAB6UBdjw7UzHIE12ac8CzHdwCeO72Aav4HWYvh5hlNSruK3FciJnTix4cbpzpwzm4Uol/yE8Yq1XkSeDvUW7vm7YgiFQDUokgdEVeA0wUo8dVJc3acwi2ufS/Umh+RvhzOleTijOXe2F+UMegQeg2+UFriZ8KUEi3hJxpNHEJyNb4x7JTeGomKBDRphrZEnCIEHuK+P9Iah/W0FSYTF2apb1W2sfqZ27I2RDi0nFirkgqlgGrnJio=
