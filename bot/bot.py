@@ -28,28 +28,30 @@ def main():
 
     # Initialize the stream
     bot_stream = TwitterStream(
-        auth=AUTH,
-        track="@chano4mayor2k19",
-        retry=5)
+        auth=AUTH)
 
     # Continuously iterate over the stream generator and make replies
     # (This runs an infinite loop – make sure to manage this code with
     # a process control system)
     while True:
+        print("Listening for tweets...")
         try:
-            for tweet in bot_stream.user():
+
+            for tweet in bot_stream.statuses.filter(track="@chano4mayor2k19"):
                 if not tweet or tweet.get("timeout") or tweet["id_str"] in processed_ids:
                     continue
                 if tweet.get("disconnect") or tweet.get("hangup"):
                     print("[WARN] Stream connection lost: %s" % str(tweet), file=sys.stderr)
                     break
                 if tweet.get("text"):
+                    print(tweet.get("text"))
                     processed_ids.append(tweet["id_str"])
-                    url = flickr.get_photo()
-                    orig_img = memer.image(url)
+                    # url = flickr.get_photo()
+                    # orig_img = memer.image(url)
                     text = get_text(tweet["text"])
-                    img = memer.meme(orig_img, text)
-                    reply(tweet, img)
+                    print(text)
+                    # img = memer.meme(orig_img, text)
+                    # reply(tweet, img)
                 else:
                     print("[INFO] Received special message: %s" % str(tweet), file=sys.stderr)
         except(TwitterHTTPError, BadStatusLine, SSLError, socket.error) as e:
