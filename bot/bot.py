@@ -4,7 +4,7 @@ import time
 import socket
 from ssl import SSLError
 from http.client import BadStatusLine
-from os import listdir
+from io import BytesIO
 
 from twitter import Twitter, TwitterStream, TwitterHTTPError, OAuth
 from wordfilter import Wordfilter
@@ -18,8 +18,6 @@ AUTH = OAuth(
     secrets.token_secret,
     secrets.consumer_key,
     secrets.consumer_secret)
-
-FONTS = [("fonts/" + font) for font in listdir('fonts')]
 
 
 def main():
@@ -44,14 +42,14 @@ def main():
                     print("[WARN] Stream connection lost: %s" % str(tweet), file=sys.stderr)
                     break
                 if tweet.get("text"):
-                    print(tweet.get("text"))
+                    print('Received tweet: "', tweet.get("text"), '"')
                     processed_ids.append(tweet["id_str"])
-                    # url = flickr.get_photo()
-                    # orig_img = memer.image(url)
+                    url = flickr.get_photo()
+                    orig_img = memer.image(url)
                     text = get_text(tweet["text"])
-                    print(text)
-                    # img = memer.meme(orig_img, text)
-                    # reply(tweet, img)
+                    print("Processed text: ", text)
+                    img = memer.meme(orig_img, text)
+                    reply(tweet, img)
                 else:
                     print("[INFO] Received special message: %s" % str(tweet), file=sys.stderr)
         except(TwitterHTTPError, BadStatusLine, SSLError, socket.error) as e:
@@ -77,18 +75,23 @@ def reply(tweet, img):
     # Connect to REST API
     bot = Twitter(auth=AUTH, retry=5)
 
+    # Prep the image for posting
+    buff = BytesIO()
+    img.save(buff, format="PNG")
+    buff.seek(0)
+
     # Upload image to Twitter's server and collect its ID
     upload = Twitter(
         domain="upload.twitter.com",
         auth=AUTH,
         retry=5)
-    img_id = upload.media.upload(media=img)["media_id_string"]
+    img_id = upload.media.upload(media=buff.getvalue())["media_id_string"]
 
     # Send the reply
     bot.statuses.update(
         status="@" + tweet["user"]["screen_name"],
         in_reply_to_status_id=tweet["id_str"],
-        media_ids=[img_id])
+        media_ids=img_id)
 
 
 if __name__ == '__main__':

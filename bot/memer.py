@@ -25,7 +25,7 @@ def meme(img, text):
         text: text to superimpose (str)
     """
     # Choose a random font from the fonts/ directory
-    possible_fonts = [("../fonts/" + font) for font in listdir('../fonts')]
+    possible_fonts = [("fonts/" + font) for font in listdir('fonts')]
     font_choice = random.sample(possible_fonts, 1)[0]
     font = ImageFont.truetype(font_choice, 36)
 
