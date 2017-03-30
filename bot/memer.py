@@ -28,11 +28,15 @@ def meme(img, text):
     possible_fonts = [("fonts/" + font) for font in listdir('fonts')]
     font_choice = random.sample(possible_fonts, 1)[0]
     font = ImageFont.truetype(font_choice, 36)
+    # Hashtag should always be comic sans
+    hashtag_font = ImageFont.truetype('fonts/comic_sans.ttf', 24)
 
-    # Get some useful info about the image and instantiate the canvas
+    # Get some useful info about the image and instantiate the canvases
     img_width, img_height = img.size
     text_img = Image.new('RGBA', img.size, (255, 255, 255, 0))
+    hashtag_img = Image.new('RGBA', img.size, (255, 255, 255, 0))
     draw = ImageDraw.Draw(text_img)
+    hashtag_draw = ImageDraw.Draw(hashtag_img)
 
     # Clean up line breaks in text
     lines = []
@@ -104,11 +108,27 @@ def meme(img, text):
                       (255, 255, 255), font=font)
             position[1] += draw.textsize('\n'.join(line), font=font)[1] + 16
 
-    # Rotate the text canvas for DRAMATIC EFFECT, resize + paste
+    # Rotate the text canvas for DRAMATIC EFFECT and resize other canvases
     rotated_text = text_img.rotate(
         rotation_degree,
         expand=1,
         resample=Image.BICUBIC)
     img.resize(rotated_text.size)
+    hashtag_img.resize(img.size)
+
+    # Write the hashtag in the bottom right-hand corner
+    hashtag_position = [hashtag_img.size[0]-175, hashtag_img.size[1]-35]
+
+    # hashtag_position = [303, 262]
+
+    # Start with black text...
+    hashtag_draw.text(hashtag_position, '#Chano4Mayor', (0, 0, 0),
+                      font=hashtag_font)
+    # Then white text, shifted over
+    hashtag_draw.text((hashtag_position[0]-2, hashtag_position[1]-2),
+                      '#Chano4Mayor', (255, 255, 255), font=hashtag_font)
+
+    # Paste text layers over the image
     img.paste(rotated_text, (0, 0), mask=rotated_text)
+    img.paste(hashtag_img, (0, 0), mask=hashtag_img)
     return img
