@@ -2,20 +2,27 @@ from __future__ import division
 from io import BytesIO
 from math import ceil
 import random
-from os import listdir
 
 import requests
 from PIL import Image, ImageFont, ImageDraw
 
-COLORS = [
-    (0, 102, 255),
-    (0, 255, 0),
+BACKGROUND_COLORS = [
+    (0, 128, 128),
+    (0, 153, 0),
+    (0, 102, 204),
+    (179, 0, 255),
     (255, 51, 0),
+    (204, 163, 0),
+    (0, 0, 0)
+]
+
+FOREGROUND_COLORS = [
+    (0, 255, 255),
     (102, 255, 51),
-    (255, 153, 0),
-    (255, 51, 133),
-    (0, 255, 204),
-    (255, 204, 0),
+    (153, 204, 255),
+    (240, 204, 255),
+    (255, 173, 153),
+    (255, 214, 51)
 ]
 
 
@@ -39,7 +46,8 @@ def meme(img, text):
     # Fonts and type color
     font = ImageFont.truetype('fonts/roboto.ttf', 36)
     hashtag_font = ImageFont.truetype('fonts/roboto.ttf', 24)
-    background_color, foreground_color = random.sample(COLORS, 2)
+    background_color = random.sample(BACKGROUND_COLORS, 1)[0]
+    foreground_color = random.sample(FOREGROUND_COLORS, 1)[0]
 
     # Get some useful info about the image and instantiate the canvases
     img_width, img_height = img.size
