@@ -2,9 +2,13 @@ from __future__ import print_function
 import sys
 import time
 import socket
+import smtplib
 from ssl import SSLError
 from http.client import BadStatusLine
 from io import BytesIO
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
 
 from twitter import Twitter, TwitterStream, TwitterHTTPError, OAuth
 from wordfilter import Wordfilter
@@ -12,12 +16,6 @@ from wordfilter import Wordfilter
 import secrets
 import flickr
 import memer
-
-AUTH = OAuth(
-    secrets.token,
-    secrets.token_secret,
-    secrets.consumer_key,
-    secrets.consumer_secret)
 
 
 def main():
@@ -49,7 +47,7 @@ def main():
                     text = get_text(tweet["text"])
                     print("Processed text: ", text)
                     img = memer.meme(orig_img, text)
-                    reply(tweet, img)
+                    email(tweet, img)
                 else:
                     print("[INFO] Received special message: %s" % str(tweet), file=sys.stderr)
         except(TwitterHTTPError, BadStatusLine, SSLError, socket.error) as e:
@@ -69,6 +67,52 @@ def get_text(text):
         return(text.split(quotes)[1])
     else:
         return("Sorry Friend!\nWe don't support that kind of language.")
+
+
+def email(tweet, img):
+    global EMAIL_COUNTER
+
+    fromaddr = secrets.email_username
+    toaddr = secrets.email_handler
+    username = secrets.email_username
+    password = secrets.email_password
+
+    # Prep the image for posting
+    buff = BytesIO()
+    img.save(buff, format="PNG")
+    buff.seek(0)
+    filename = "chano_meme_" + str(EMAIL_COUNTER)
+
+    msg = MIMEMultipart()
+    msg['Subject'] = "New Chano Meme #" + str(EMAIL_COUNTER) + "!"
+    msg['From'] = fromaddr
+    msg['To'] = toaddr
+
+    raw_text = "\r\n".join([
+        "New mention from @" + tweet["user"]["screen_name"] + ":",
+        "",
+        "'" + tweet["text"] + "'",
+        "",
+        "You can take it from here!",
+        "",
+        "<3,",
+        "",
+        "-Chano Bot"
+    ])
+
+    text = MIMEText(raw_text)
+    msg.attach(text)
+    image = MIMEImage(buff.getvalue(), name=filename)
+    msg.attach(image)
+
+    server = smtplib.SMTP(secrets.email_smtp_server)
+    server.ehlo()
+    server.starttls()
+    server.login(username, password)
+    server.sendmail(fromaddr, toaddr, msg.as_string())
+    server.quit()
+
+    EMAIL_COUNTER += 1
 
 
 def reply(tweet, img):
@@ -95,4 +139,15 @@ def reply(tweet, img):
 
 
 if __name__ == '__main__':
+
+    AUTH = OAuth(
+        secrets.token,
+        secrets.token_secret,
+        secrets.consumer_key,
+        secrets.consumer_secret
+    )
+
+    global EMAIL_COUNTER
+    EMAIL_COUNTER = 1
+
     main()
