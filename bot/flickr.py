@@ -2,14 +2,23 @@ from __future__ import print_function
 import random
 import json
 import sys
+import subprocess
+from os.path import isfile
+from builtins import input
 
 import requests
 
 import secrets
 
-def get_photo():
+
+def scrape_photos():
     """
-    Returns the URL of a random CC-licensed image of Chance.
+    Creates a JSON file with all CC-licensed images of Chance.
+
+    Generates the file `chance_pics.json` in this directory. Unfortunately,
+    you'll have to edit the picture collection manually if you want to remove
+    non-Chance images (until we can train a neural net to recognize Chance,
+    that is).
     """
     endpoint = "https://api.flickr.com/services/rest/"
     api_key = secrets.flickr_api_key
@@ -36,21 +45,18 @@ def get_photo():
             response_text = r.text[14:-1]
             data = json.loads(response_text)
             photos = data["photos"]["photo"]
-            random_photo = random.sample(photos, 1)
 
-            photo_id = random_photo[0]["id"]
-            server_id = random_photo[0]["server"]
-            farm_id = random_photo[0]["farm"]
-            secret = random_photo[0]["secret"]
+            for photo in photos:
+                photo_url = photo_url_template.format(
+                    id=photo["id"],
+                    server_id=photo["server"],
+                    farm_id=photo["farm"],
+                    secret=photo["secret"]
+                )
+                photo["url"] = photo_url
 
-            photo_url = photo_url_template.format(
-                id=photo_id,
-                server_id=server_id,
-                farm_id=farm_id,
-                secret=secret
-            )
-
-            return photo_url
+            with open('chance_pics.json', 'w') as out:
+                json.dump(photos, out)
         except ValueError:
             print('Catching ValueError...', file=sys.stderr)
             print('Request URL: ', r.url, file=sys.stderr)
@@ -61,3 +67,54 @@ def get_photo():
     else:
         print('Bad status code: ', r.status_code, file=sys.stderr)
         print('Request URL: ', r.url, file=sys.stderr)
+
+
+def edit_scraped_photos():
+    """
+    Launches a command-line interface that allows you to view scraped images
+    and remove any that you don't like.
+    """
+    if not isfile('chance_pics.json'):
+        scrape_photos()
+        edit_scraped_photos()
+    else:
+        with open('chance_pics.json') as f:
+            pics = json.load(f)
+
+        print('Launching image review...')
+        current = 0
+        total = len(pics)
+        output = []
+        for pic in pics:
+            current += 1
+            print('Image %s / %s:' % (current, total))
+            print('===============')
+            subprocess.Popen(['open', pic['url']])
+            decision = False
+            while not decision:
+                ruling = input('Keep this image? (y / n) ')
+                if ruling in ['Y', 'y', 'yes', '']:
+                    output.append(pic)
+                    decision = True
+                elif ruling in ['N', 'n', 'no']:
+                    decision = True
+                else:
+                    print("I didn't understand the input. Try one of: y / n")
+                    print('Launching the image again...')
+                    print('Image %s / %s:' % (current, total))
+                    print('===============')
+                    subprocess.Popen(['open', pic['url']])
+        with open('edited_chance_pics.json', 'w') as f:
+            json.dump(output, f)
+
+
+
+def get_photo():
+    """
+    Returns the URL of a random CC-licensed image of Chance.
+    """
+    with open('chance_pics.json') as f:
+        pics = json.load(f)
+
+    random_photo = random.sample(pics, 1)[0]
+    return random_photo['url']

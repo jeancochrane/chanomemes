@@ -1,3 +1,4 @@
+from __future__ import division
 from io import BytesIO
 from math import ceil
 import random
@@ -29,7 +30,7 @@ def meme(img, text):
     font_choice = random.sample(possible_fonts, 1)[0]
     font = ImageFont.truetype(font_choice, 36)
     # Hashtag should always be comic sans
-    hashtag_font = ImageFont.truetype('fonts/comic_sans.ttf', 24)
+    hashtag_font = ImageFont.truetype('fonts/roboto.ttf', 24)
 
     # Get some useful info about the image and instantiate the canvases
     img_width, img_height = img.size
