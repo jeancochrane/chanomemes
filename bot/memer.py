@@ -114,7 +114,6 @@ def meme(img, text):
 
     for line in cleaned_lines:
         width, height = font.getsize(line)
-        print(height)
         width = (img_width - width)/2
         draw.text((width, y), line, background_color, font=font)
         draw.text((width+2, y-2), line,
