@@ -108,12 +108,11 @@ def edit_scraped_photos():
             json.dump(output, f)
 
 
-
 def get_photo():
     """
     Returns the URL of a random CC-licensed image of Chance.
     """
-    with open('chance_pics.json') as f:
+    with open('edited_chance_pics.json') as f:
         pics = json.load(f)
 
     random_photo = random.sample(pics, 1)[0]

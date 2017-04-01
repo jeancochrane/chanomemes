@@ -29,7 +29,7 @@ def main():
         auth=AUTH)
 
     # Continuously iterate over the stream generator and make replies
-    # (This runs an infinite loop – make sure to manage this code with
+    # (This runs an infinite loop - make sure to manage this code with
     # a process control system)
     while True:
         print("Listening for tweets...")
