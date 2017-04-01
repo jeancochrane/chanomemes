@@ -35,6 +35,12 @@ def image(url):
     return img
 
 
+def debug_meme(img_path):
+    img = Image.open('/Users/jeancochrane/Desktop/corey_new.jpeg').convert('RGBA')
+    m = meme(img, 'Im in LOVE with my city bitch i sleep in my hat')
+    m.show()
+
+
 def meme(img, text):
     """
     Superimposes text over a given image.
@@ -94,50 +100,46 @@ def meme(img, text):
                         too_long = False
             frag1 = line[0:stopping_point-1]
             frag2 = line[stopping_point:]
-            line_copy = frag1 + '\n' + frag2
-        cleaned_lines.append(line_copy)
-
-    # Figure out how many lines there are
-    if len(cleaned_lines) > 1:
-        if len(cleaned_lines) % 2 == 0:
-            halfway_pt = (len(cleaned_lines)//2)
-            split_text = [cleaned_lines[0:halfway_pt], cleaned_lines[halfway_pt:]]
+            cleaned_lines.append(frag1)
+            cleaned_lines.append(frag2)
         else:
-            halfway_pt = ceil(len(cleaned_lines)/2)
-            split_text = [cleaned_lines[0:halfway_pt], cleaned_lines[halfway_pt:]]
-    else:
-        split_text = cleaned_lines.copy()
+            cleaned_lines.append(line_copy)
 
     # Draw the text on the canvas
-    position = [5, 0]
-    rotation_degree = random.uniform(-30, 30)
-    if len(split_text) == 1:
-        # Start with black text
-        draw.text(position, '\n'.join(split_text), background_color,
-                            font=font)
-        # Shift position over a lil and add white on top
-        draw.text((position[0]-2, position[1]-2), '\n'.join(split_text),
-                  foreground_color, font=font)
+    if len(cleaned_lines) < 4:
+        rotation_degree = random.uniform(-30, 30)
     else:
-        for line in split_text:
-            draw.text(position, '\n'.join(line), background_color,
-                                font=font)
-            draw.text((position[0]-2, position[1]-2), '\n'.join(line),
-                      foreground_color, font=font)
-            position[1] += draw.textsize('\n'.join(line), font=font)[1] + 16
+        rotation_degree = random.uniform(-20, 20)
+    y = 0
+
+    for line in cleaned_lines:
+        width, height = font.getsize(line)
+        print(height)
+        width = (img_width - width)/2
+        draw.text((width, y), line, background_color, font=font)
+        draw.text((width+2, y-2), line,
+                   foreground_color, font=font)
+        y += 40
 
     # Rotate the text canvas for DRAMATIC EFFECT and resize other canvases
+    if rotation_degree > 0:
+        center = None
+        translate = None
+    else:
+        center = (0, 0)
+        translate = ((3/10)*rotation_degree, 3*rotation_degree)
+
     rotated_text = text_img.rotate(
         rotation_degree,
         expand=1,
-        resample=Image.BICUBIC)
+        center=center,
+        resample=Image.BICUBIC,
+        translate=translate)
     img.resize(rotated_text.size)
     hashtag_img.resize(img.size)
 
     # Write the hashtag in the bottom right-hand corner
     hashtag_position = [hashtag_img.size[0]-175, hashtag_img.size[1]-35]
-
-    # hashtag_position = [303, 262]
 
     # Start with black text...
     hashtag_draw.text(hashtag_position, '#Chano4Mayor', (0, 0, 0),
