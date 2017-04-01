@@ -1,3 +1,4 @@
+from __future__ import division
 from io import BytesIO
 from math import ceil
 import random

@@ -2,6 +2,9 @@ from __future__ import print_function
 import random
 import json
 import sys
+import subprocess
+from os.path import isfile
+from builtins import input
 
 import requests
 
@@ -64,6 +67,46 @@ def scrape_photos():
     else:
         print('Bad status code: ', r.status_code, file=sys.stderr)
         print('Request URL: ', r.url, file=sys.stderr)
+
+
+def edit_scraped_photos():
+    """
+    Launches a command-line interface that allows you to view scraped images
+    and remove any that you don't like.
+    """
+    if not isfile('chance_pics.json'):
+        scrape_photos()
+        edit_scraped_photos()
+    else:
+        with open('chance_pics.json') as f:
+            pics = json.load(f)
+
+        print('Launching image review...')
+        current = 0
+        total = len(pics)
+        output = []
+        for pic in pics:
+            current += 1
+            print('Image %s / %s:' % (current, total))
+            print('===============')
+            subprocess.Popen(['open', pic['url']])
+            decision = False
+            while not decision:
+                ruling = input('Keep this image? (y / n) ')
+                if ruling in ['Y', 'y', 'yes', '']:
+                    output.append(pic)
+                    decision = True
+                elif ruling in ['N', 'n', 'no']:
+                    decision = True
+                else:
+                    print("I didn't understand the input. Try one of: y / n")
+                    print('Launching the image again...')
+                    print('Image %s / %s:' % (current, total))
+                    print('===============')
+                    subprocess.Popen(['open', pic['url']])
+        with open('edited_chance_pics.json', 'w') as f:
+            json.dump(output, f)
+
 
 
 def get_photo():
