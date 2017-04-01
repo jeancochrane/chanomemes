@@ -7,6 +7,17 @@ from os import listdir
 import requests
 from PIL import Image, ImageFont, ImageDraw
 
+COLORS = [
+    (0, 102, 255),
+    (0, 255, 0),
+    (255, 51, 0),
+    (102, 255, 51),
+    (255, 153, 0),
+    (255, 51, 133),
+    (0, 255, 204),
+    (255, 204, 0),
+]
+
 
 def image(url):
     """
@@ -25,12 +36,10 @@ def meme(img, text):
         img: a PIL Image (obj)
         text: text to superimpose (str)
     """
-    # Choose a random font from the fonts/ directory
-    possible_fonts = [("fonts/" + font) for font in listdir('fonts')]
-    font_choice = random.sample(possible_fonts, 1)[0]
-    font = ImageFont.truetype(font_choice, 36)
-    # Hashtag should always be comic sans
+    # Fonts and type color
+    font = ImageFont.truetype('fonts/roboto.ttf', 36)
     hashtag_font = ImageFont.truetype('fonts/roboto.ttf', 24)
+    background_color, foreground_color = random.sample(COLORS, 2)
 
     # Get some useful info about the image and instantiate the canvases
     img_width, img_height = img.size
@@ -96,17 +105,17 @@ def meme(img, text):
     rotation_degree = random.uniform(-30, 30)
     if len(split_text) == 1:
         # Start with black text
-        draw.text(position, '\n'.join(split_text), (0, 0, 0),
+        draw.text(position, '\n'.join(split_text), background_color,
                             font=font)
         # Shift position over a lil and add white on top
         draw.text((position[0]-2, position[1]-2), '\n'.join(split_text),
-                  (255, 255, 255), font=font)
+                  foreground_color, font=font)
     else:
         for line in split_text:
-            draw.text(position, '\n'.join(line), (0, 0, 0),
+            draw.text(position, '\n'.join(line), background_color,
                                 font=font)
             draw.text((position[0]-2, position[1]-2), '\n'.join(line),
-                      (255, 255, 255), font=font)
+                      foreground_color, font=font)
             position[1] += draw.textsize('\n'.join(line), font=font)[1] + 16
 
     # Rotate the text canvas for DRAMATIC EFFECT and resize other canvases
