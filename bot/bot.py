@@ -81,7 +81,7 @@ def email(tweet, img):
     buff = BytesIO()
     img.save(buff, format="PNG")
     buff.seek(0)
-    filename = "chano_meme_" + str(EMAIL_COUNTER)
+    filename = "chano_meme_" + str(EMAIL_COUNTER) + ".png"
 
     msg = MIMEMultipart()
     msg['Subject'] = "New Chano Meme #" + str(EMAIL_COUNTER) + "!"
