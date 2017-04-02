@@ -42,12 +42,13 @@ def main():
                 if tweet.get("text"):
                     print('Received tweet: "', tweet.get("text"), '"')
                     processed_ids.append(tweet["id_str"])
-                    url = flickr.get_photo()
+                    photo = flickr.get_photo()
+                    url, user, user_profile = photo["url"], photo["user"], photo["user_profile"]
                     orig_img = memer.image(url)
                     text = get_text(tweet["text"])
                     print("Processed text: ", text)
                     img = memer.meme(orig_img, text)
-                    email(tweet, img)
+                    email(tweet, img, {"user": user, "user_profile": user_profile})
                 else:
                     print("[INFO] Received special message: %s" % str(tweet), file=sys.stderr)
         except(TwitterHTTPError, BadStatusLine, SSLError, socket.error) as e:
@@ -69,7 +70,7 @@ def get_text(text):
         return("Sorry Friend!\nWe don't support that kind of language.")
 
 
-def email(tweet, img):
+def email(tweet, img, options={}):
     global EMAIL_COUNTER
 
     fromaddr = secrets.email_username
@@ -89,11 +90,25 @@ def email(tweet, img):
     msg['To'] = toaddr
 
     raw_text = "\r\n".join([
-        "New mention from @" + tweet["user"]["screen_name"] + ":",
+        "New mention from @" + tweet["user"]["screen_name"] + ": '" + tweet["text"] + "'",
         "",
-        "'" + tweet["text"] + "'",
-        "",
-        "You can take it from here!",
+        ""
+    ])
+
+    if options and options["user"] and options["user_profile"]:
+        raw_text += "\r\n".join([
+            "I suggest you reply with:",
+            "",
+            "#chano4mayor",
+            "",
+            "📸: " + options["user"] + " " + options["user_profile"],
+            "",
+            "(Remember, Twitter will shorten the link.)",
+            ""
+        ])
+
+    raw_text += "\r\n" + "\r\n".join([
+        "It's all you from here!",
         "",
         "<3,",
         "",

@@ -27,6 +27,7 @@ def scrape_photos():
     license = "1,2,4,5,7"  # All CC
     text = "chance the rapper"
     content_type = 1  # Photos only (no screenshots)
+    per_page = 500
 
     params = {
         "api_key": api_key,
@@ -34,7 +35,8 @@ def scrape_photos():
         "format": format,
         "license": license,
         "text": text,
-        "content_type": content_type
+        "content_type": content_type,
+        "per_page": per_page
     }
 
     photo_url_template = "https://farm{farm_id}.staticflickr.com/{server_id}/{id}_{secret}.jpg"
@@ -116,4 +118,41 @@ def get_photo():
         pics = json.load(f)
 
     random_photo = random.sample(pics, 1)[0]
-    return random_photo['url']
+
+    # Retrieve author information for this photo
+    endpoint = "https://api.flickr.com/services/rest/"
+    api_key = secrets.flickr_api_key
+    method = "flickr.people.getInfo"
+    format = "json"
+
+    params = {
+        "api_key": api_key,
+        "method": method,
+        "format": format,
+        "user_id": random_photo["owner"]
+    }
+
+    r = requests.get(endpoint, params=params)
+    if r.status_code == 200:
+        try:
+            response_text = r.text[14:-1]
+            data = json.loads(response_text)
+
+            user = data['person']['realname']['_content']
+        except ValueError:
+            print('Catching ValueError...', file=sys.stderr)
+            print('Request URL: ', r.url, file=sys.stderr)
+            print('Encoding: ', r.encoding, file=sys.stderr)
+            print('Content type: ', r.headers['content-type'], file=sys.stderr)
+    else:
+        print('Bad status code: ', r.status_code, file=sys.stderr)
+        print('Request URL: ', r.url, file=sys.stderr)
+        user = "User not found - check the link to find their name"
+
+    photo = {
+        "url": random_photo["url"],
+        "user": user,
+        "user_profile": "https://www.flickr.com/people/" + random_photo["owner"]
+    }
+
+    return photo
