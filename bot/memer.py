@@ -117,7 +117,7 @@ def meme(img, text, emoji=True):
 
     # Create linebreaks when text is too long for the image
     cleaned_lines = []
-    for line in lines:
+    for i, line in enumerate(lines):
         line_copy = line
         if draw.textsize(line, font=font)[0] > img_width:
             too_long = True
@@ -132,7 +132,7 @@ def meme(img, text, emoji=True):
             frag1 = line[0:stopping_point-1]
             frag2 = line[stopping_point:]
             cleaned_lines.append(frag1)
-            cleaned_lines.append(frag2)
+            lines.insert(i+1, frag2)
         else:
             cleaned_lines.append(line_copy)
 
