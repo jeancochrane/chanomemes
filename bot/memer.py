@@ -2,6 +2,7 @@ from __future__ import division
 from io import BytesIO
 from math import ceil
 import random
+from os import listdir
 
 import requests
 from PIL import Image, ImageFont, ImageDraw
@@ -66,17 +67,18 @@ def debug_meme(img_path):
     Method for quickly debugging image generation.
     """
     img = Image.open(img_path).convert('RGBA')
-    m = meme(img, 'Im in LOVE with my city bitch i sleep in my hat')
+    m = meme(img, 'Im in LOVE with my city bitch i sleep in my hat', emoji=True)
     m.show()
 
 
-def meme(img, text):
+def meme(img, text, emoji=True):
     """
     Superimposes text over a given image.
 
     Params –
         img: a PIL Image (obj)
         text: text to superimpose (str)
+        emoji: whether or not to add extra emojis (bool)
     """
     # Fonts and type color
     font = ImageFont.truetype('fonts/roboto.ttf', 36)
@@ -87,6 +89,7 @@ def meme(img, text):
     img_width, img_height = img.size
     text_img = Image.new('RGBA', img.size, (255, 255, 255, 0))
     hashtag_img = Image.new('RGBA', img.size, (255, 255, 255, 0))
+
     draw = ImageDraw.Draw(text_img)
     hashtag_draw = ImageDraw.Draw(hashtag_img)
 
@@ -175,7 +178,29 @@ def meme(img, text):
     hashtag_draw.text((hashtag_position[0]-2, hashtag_position[1]-2),
                       '#Chano4Mayor', (255, 255, 255), font=hashtag_font)
 
-    # Paste text layers over the image
+    # Make some emoji layers B~)
+    if emoji:
+        # Get a random assortment of emoji
+        possible_emoji = [('emoji/' + e) for e in listdir('emoji')]
+        num_emoji = random.sample([x for x in range(2, 6)], 1)[0]
+        # Make those layers
+        emoji_img = Image.new('RGBA', img.size, (255, 255, 255, 0))
+        for e in random.sample(possible_emoji, num_emoji):
+            im = Image.open(e).convert('RGBA')
+            im = im.resize(
+                (im.size[0]//3, im.size[1]//3),
+                resample=Image.BICUBIC
+            )
+            im = im.rotate(
+                random.uniform(-45, 45),
+                resample=Image.BICUBIC
+            )
+            x = int(random.uniform(0, img.size[0]))
+            y = int(random.uniform(0, img.size[1]))
+            emoji_img.paste(im, (x, y), mask=im)
+
+    # Paste layers over the image
+    img.paste(emoji_img, (0, 0), mask=emoji_img)
     img.paste(rotated_text, (0, 0), mask=rotated_text)
     img.paste(hashtag_img, (0, 0), mask=hashtag_img)
     return img

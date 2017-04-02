@@ -47,7 +47,7 @@ def main():
                     orig_img = memer.image(url)
                     text = get_text(tweet["text"])
                     print("Processed text: ", text)
-                    img = memer.meme(orig_img, text)
+                    img = memer.meme(orig_img, text, emoji=True)
                     email(tweet, img, {"user": user, "user_profile": user_profile})
                 else:
                     print("[INFO] Received special message: %s" % str(tweet), file=sys.stderr)
