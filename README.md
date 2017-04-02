@@ -63,8 +63,8 @@ memer.debug_meme(filepath, text)
 On Twitter, the bot has been written to:
 
 1. listen for mentions @ our account
-2. strip text in quotation marks (`" "`)
-3. paste the text onto a random image of Chance
+2. remove our handle from the text and prep it for memeing
+3. paste the text onto a random image of Chance in [Word Art](https://twitter.com/wordartt?lang=en) fashion
 4. add some emojis on top, for flavor
 5. deliver a notification email to us with the image + suggested reply text, so that we can manually review
 
