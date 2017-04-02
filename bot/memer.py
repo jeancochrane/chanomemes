@@ -195,8 +195,8 @@ def meme(img, text, emoji=True):
                 random.uniform(-45, 45),
                 resample=Image.BICUBIC
             )
-            x = int(random.uniform(0, img.size[0]))
-            y = int(random.uniform(0, img.size[1]))
+            x = int(random.uniform(0, img.size[0]-im.size[0]))
+            y = int(random.uniform(0, img.size[1]-im.size[1]))
             emoji_img.paste(im, (x, y), mask=im)
 
     # Paste layers over the image
