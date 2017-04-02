@@ -62,12 +62,12 @@ def image(url):
     return img
 
 
-def debug_meme(img_path):
+def debug_meme(img_path, text):
     """
     Method for quickly debugging image generation.
     """
     img = Image.open(img_path).convert('RGBA')
-    m = meme(img, 'Im in LOVE with my city bitch i sleep in my hat', emoji=True)
+    m = meme(img, text, emoji=True)
     m.show()
 
 
