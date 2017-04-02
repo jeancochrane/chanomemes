@@ -11,7 +11,6 @@ from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 
 from twitter import Twitter, TwitterStream, TwitterHTTPError, OAuth
-from wordfilter import Wordfilter
 
 import secrets
 import flickr
@@ -58,19 +57,25 @@ def main():
 
 
 def get_text(text):
-    filt = Wordfilter()
-    if not filt.blacklisted(text):
-        if '\"' in text:
-            quotes = '\"'
+    """
+    Converts tweets to meme-ready text.
+    """
+    split_text = text.split("@chano4mayor2k19")
+    # If the tweet is a direct @, strip our username
+    if len(split_text[0]) <= 1:
+        if split_text[1][0] == " ":
+            return split_text[1][1:]
         else:
-            return("Hey Bud!\nPut your text in \"quotes\"" +
-                   "and I\'d be happy to make you a meme!")
-        return(text.split(quotes)[1])
+            return split_text[1]
+    # Otherwise, just return the full text
     else:
-        return("Sorry Friend!\nWe don't support that kind of language.")
+        return text
 
 
 def email(tweet, img, options={}):
+    """
+    Sends an email to a notification account with meme info.
+    """
     global EMAIL_COUNTER
 
     fromaddr = secrets.email_username
@@ -131,6 +136,11 @@ def email(tweet, img, options={}):
 
 
 def reply(tweet, img):
+    """
+    Replies automatically to a tweet given an image.
+
+    (Disabled in the current version of Chano Bot.)
+    """
     # Connect to REST API
     bot = Twitter(auth=AUTH, retry=5)
 
