@@ -26,6 +26,32 @@ FOREGROUND_COLORS = [
 ]
 
 
+def get_colors():
+    """
+    Returns a random pastel color pair for foreground and background.
+    """
+    colors = [
+        (238, 160, 165),
+        (237, 176, 13),
+        (226, 237, 13),
+        (133, 237, 13),
+        (13, 237, 195),
+        (99, 170, 255),
+        (203, 160, 238),
+        (0, 255, 255),
+        (102, 255, 51),
+        (153, 204, 255),
+        (240, 204, 255),
+        (255, 173, 153),
+        (255, 214, 51)
+    ]
+
+    background_color = random.sample(colors, 1)[0]
+    foreground_color = tuple(map(lambda x: int(ceil(0.6*x)), background_color))
+
+    return foreground_color, background_color
+
+
 def image(url):
     """
     Opens an image from the given URL for processing.
@@ -36,7 +62,10 @@ def image(url):
 
 
 def debug_meme(img_path):
-    img = Image.open('/Users/jeancochrane/Desktop/corey_new.jpeg').convert('RGBA')
+    """
+    Method for quickly debugging image generation.
+    """
+    img = Image.open(img_path).convert('RGBA')
     m = meme(img, 'Im in LOVE with my city bitch i sleep in my hat')
     m.show()
 
@@ -52,8 +81,7 @@ def meme(img, text):
     # Fonts and type color
     font = ImageFont.truetype('fonts/roboto.ttf', 36)
     hashtag_font = ImageFont.truetype('fonts/roboto.ttf', 24)
-    background_color = random.sample(BACKGROUND_COLORS, 1)[0]
-    foreground_color = random.sample(FOREGROUND_COLORS, 1)[0]
+    background_color, foreground_color = get_colors()
 
     # Get some useful info about the image and instantiate the canvases
     img_width, img_height = img.size
@@ -117,7 +145,7 @@ def meme(img, text):
         width = (img_width - width)/2
         draw.text((width, y), line, background_color, font=font)
         draw.text((width+2, y-2), line,
-                   foreground_color, font=font)
+                  foreground_color, font=font)
         y += 40
 
     # Rotate the text canvas for DRAMATIC EFFECT and resize other canvases
